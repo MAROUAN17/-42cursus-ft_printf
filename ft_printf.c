@@ -1,130 +1,63 @@
-#include <stdarg.h>
-#include <unistd.h>
-#include <stdlib.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: maglagal <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/11/14 18:31:11 by maglagal          #+#    #+#             */
+/*   Updated: 2023/11/14 20:34:37 by maglagal         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "ft_printf.h"
 #include <stdio.h>
 
-void    ft_putchar(char c)
+void	print_conditions(va_list args, char format, int *ptr_c)
 {
-    write(1, &c, 1);
+	if (format == '%')
+		ft_putchar('%', ptr_c);
+	else if (format == 'c')
+		ft_putchar(va_arg(args, int), ptr_c);
+	else if (format == 'd' || format == 'i')
+		ft_putnbr(va_arg(args, int), ptr_c);
+	else if (format == 's')
+		isstring(va_arg(args, char *), ptr_c);
+	else if (format == 'p')
+		per_p(va_arg(args, void *), ptr_c);
+	else if (format == 'x' || format == 'X')
+		per_x(va_arg(args, int), format, ptr_c);
+	else if (format == 'u')
+		ft_putnbr(va_arg(args, unsigned int), ptr_c);
 }
 
-void    ft_putnbr(long d, int *ptr_c)
+int	ft_printf(const char *format, ...)
 {
-    if (d < 0)
-    {
-        ft_putchar('-');
-        d = -d;
-    }
-    if (d >= 10)
-    {
-        (*ptr_c)++;
-        ft_putnbr(d / 10, ptr_c);
-        ft_putnbr(d % 10, ptr_c);
-    }
-    if (d < 10)
-    {
-        d = d + 48;
-        ft_putchar(d);
-    }
-}
+	va_list	args;
+	int		counter;
 
-int ft_printf(const char *format, ...)
-{
-    int             i;
-    int             counter;
-    unsigned int    ui;
-    int             index;
-    unsigned long   ul;
-    char            c;
-    char            *s;
-    char            *base;
-    unsigned long   *ptr_ul;
-    int             z;
-    char            hex[50];
-    va_list         args;
-
-    index = 0;
-    counter = 0;
-    z = 0;
-    base = "0123456789abcdef";
-    va_start(args, format);
-    while (*format == '%')
-    {
-        format++;
-        while (*format == 'c')
-        {
-            c = va_arg(args, int);
-            ft_putchar(c);
-            counter++;
-            format++;
-            return (counter);
-        }
-        while (*format == 'd' || *format == 'i')
-        {
-            i = va_arg(args, int);
-            ft_putnbr(i, &counter);
-            format++;
-            return (counter + 1);
-        }
-        while (*format == 's')
-        {
-            s = va_arg(args, char *);
-            while(*s)
-            {
-                ft_putchar(*s);
-                counter++;
-                s++;
-            }
-            format++;
-            return (counter);
-        }
-        while (*format == 'p' || *format == 'x' || *format == 'X')
-        { 
-            ul = (unsigned long)va_arg(args, void *);
-            if (*format == 'p')
-            {
-                ft_putchar('0');
-                ft_putchar('x');
-            }
-            while(ul != 0)
-            {
-                index = ul % 16;
-                if (*format == 'X' && index >= 10)
-                    hex[z] = *(base + index) - 32;
-                else
-                    hex[z] = *(base + index);
-                ul /= 16;
-                z++;
-                counter++;
-            }
-            while (z > 0)
-            {
-                ft_putchar(hex[z - 1]);
-                z--;
-            }
-            format++;
-            return (counter);
-        }
-        while (*format == 'u')
-        {
-            ui = va_arg(args, unsigned int);
-            ft_putnbr(ui, &counter);
-            format++;
-            return (counter + 1);
-        }
-        if (*format == '%')
-        {
-            ft_putchar('%');
-            return (1);
-        }
-    }
-    va_end(args);
-    return (c);
+	counter = 0;
+	va_start(args, format);
+	if (!format || write(1, "", 0) == -1)
+		return (-1);
+	while (*format)
+	{
+		if (*format != '%')
+			ft_putchar(*format, &counter);
+		if (*format == '%')
+		{
+			format++;
+			print_conditions(args, *format, &counter);
+		}
+		format++;
+	}
+	va_end(args);
+	return (counter);
 }
 
 int main()
 {
-    int str = 9;
-    printf("\n%d\n", ft_printf("%X", str));
-    // printf("\n%u\n", str);
+    // int str = 120;
+    ft_printf("len => %d\n", ft_printf("result=> %d", 042));
+   	printf("len => %d\n", printf("result=> %d", 042));
 }
